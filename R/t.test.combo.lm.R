@@ -1,3 +1,22 @@
+#' Student's t-Test with multiple hypothesis for linear regression model
+#'
+#' @param model A fitted "lm" object.
+#' @param hypotheses Vector of null hypothesis.
+#' @param alternatives Vector of alternative hypothesis, must be one of "two.sided", "greater" or "less".
+#' @param alpha Float. Statistical significance, by default = 0.05.
+#'
+#' @return An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.
+#' @export
+#'
+#' @examples
+#' x <- runif(100, min = 0, max = 100)
+#' z <- runif(100, min = 0, max = 100)
+#' q <- runif(100, min = 0, max = 100)
+#' e <- rnorm(100, mean = 0, sd = 1)
+#' y <- 4*x + 5*z + 6*q + 1 + e
+#' data <- data.frame(x, z, q, y)
+#' model <- lm(y ~ x + z + q, data)
+#' t.test.combo.lm(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
 t.test.combo.lm <- function(model, hypotheses, alternatives, alpha = 0.05)
 {
   Hs_0 = sapply(hypotheses, stringr::str_split_1, "=")
