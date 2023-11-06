@@ -1,6 +1,6 @@
-#' Student's t-Test with multiple hypothesis for linear regression model
+#' Student's t-Test with multiple hypothesis
 #'
-#' @param object A fitted "lm" object.
+#' @param object A data frame.
 #' @param hypotheses Vector of null hypothesis.
 #' @param alternatives Vector of alternative hypothesis, must be one of "two.sided", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
@@ -12,18 +12,15 @@
 #' x <- runif(100, min = 0, max = 100)
 #' z <- runif(100, min = 0, max = 100)
 #' q <- runif(100, min = 0, max = 100)
-#' e <- rnorm(100, mean = 0, sd = 1)
-#' y <- 4*x + 5*z + 6*q + 1 + e
-#' data <- data.frame(x, z, q, y)
-#' model <- lm(y ~ x + z + q, data)
-#' t_test_combo.lm(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
-t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
+#' data <- data.frame(x, z, q)
+#' t_test_combo.df(data, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
+t_test_combo.df <- function(object, hypotheses, alternatives, alpha = 0.05)
 {
   Hs_0 = sapply(hypotheses, stringr::str_split_1, "=")
   Hs_1 = alternatives
 
   H_count = length(Hs_1)
-  df = object$df.residual
+  df = nrow(object)
 
   if ((length(Hs_0)/2) != length(Hs_1))
   {stop("List of hypotheses and alternatives should be equal!")}
@@ -37,7 +34,9 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
   for(i in 1:H_count)
   {
-    T_i = (object$coefficients[Hs_0[1,i]] - as.numeric(Hs_0[2,i])) / sqrt(diag(vcov(object)))[Hs_0[1,i]]
+    T_mean = mean(object[,Hs_0[1,i]])
+    t_sd = sd(object[,Hs_0[1,i]])
+    T_i = (T_mean - as.numeric(Hs_0[2,i])) / t_sd * sqrt(df)
     T_stats = append(T_stats, round(T_i,4))
 
     if (Hs_1[i] == "not.equal")
