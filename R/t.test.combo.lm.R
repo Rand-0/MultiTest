@@ -42,21 +42,32 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
     if (Hs_1[i] == "not.equal")
     {
-      T_interval_i = paste0("(-Inf ; -", round(Qs_t[2],4), ")u(", round(Qs_t[2],4), " ; +Inf)")
-      T_interval = append(T_interval, T_interval_i)
+      T_interval_i = c(-round(Qs_t[2],4), round(Qs_t[2],4))
+      T_interval = rbind(T_interval, T_interval_i)
     } else if(Hs_1[i] == "greater")
     {
-      T_interval_i = paste0("(", round(Qs_t[1],4), " ; +Inf)")
-      T_interval = append(T_interval, T_interval_i)
+      T_interval_i = c(round(Qs_t[2],4), Inf)
+      T_interval = rbind(T_interval, T_interval_i)
     } else if(Hs_1[i] == "less")
     {
-      T_interval_i = paste0("(-Inf ; -", round(Qs_t[1],4), ")")
-      T_interval = append(T_interval, T_interval_i)
+      T_interval_i = c(-Inf, -round(Qs_t[2],4))
+      T_interval = rbind(T_interval, T_interval_i)
     }
   }
 
-  result = cbind(T_stats, T_interval)
-  colnames(result) = c("t-test statistics", "Critical region")
+  if(H_count <= 3)
+  {
+    P_value = mpt(replace(T_stats, T_stats>0, -T_stats), df)
+  } else
+  {
+    P_value = "P-value cannot be computed for more than 3 hypotheses!"
+  }
+
+  result = list(statistcs = T_stats, parameter = df, p.value = P_value,
+                conf.int = T_interval, estimate = object$coefficients[Hs_0[1,]],
+                null.value = as.numeric(Hs_0[2,]), stderr = sqrt(diag(vcov(object)))[Hs_0[1,]],
+                alternative = alternatives, method = "Muiltivariate t-test",
+                data.name = deparse(substitute(object)))
 
   result
 }

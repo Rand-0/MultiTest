@@ -1,9 +1,9 @@
-setClass("lm_object", contains = "lm")
-
-setClass("data_frame", contains = "data.frame")
-
 t_test_combo <- function(object, ...)
 {
+  setClass("lm_object", contains = "lm")
+
+  setClass("data_frame", contains = "data.frame")
+
   class_input <- class(object)
 
   if (class_input == "lm_object")

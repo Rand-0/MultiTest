@@ -36,17 +36,19 @@ t_test_combo.df <- function(object, hypotheses, alternatives, alpha = 0.05)
   {
     T_mean = mean(object[,Hs_0[1,i]])
     t_sd = sd(object[,Hs_0[1,i]])
-    T_i = (T_mean - as.numeric(Hs_0[2,i])) / t_sd * sqrt(df)
+    T_i = (T_mean - as.numeric(Hs_0[2,i])) / t_sd
     T_stats = append(T_stats, round(T_i,4))
 
     if (Hs_1[i] == "not.equal")
     {
       T_interval_i = paste0("(-Inf ; -", round(Qs_t[2],4), ")u(", round(Qs_t[2],4), " ; +Inf)")
       T_interval = append(T_interval, T_interval_i)
+
     } else if(Hs_1[i] == "greater")
     {
       T_interval_i = paste0("(", round(Qs_t[1],4), " ; +Inf)")
       T_interval = append(T_interval, T_interval_i)
+
     } else if(Hs_1[i] == "less")
     {
       T_interval_i = paste0("(-Inf ; -", round(Qs_t[1],4), ")")
@@ -57,5 +59,13 @@ t_test_combo.df <- function(object, hypotheses, alternatives, alpha = 0.05)
   result = cbind(T_stats, T_interval)
   colnames(result) = c("t-test statistics", "Critical region")
 
-  result
+  if(H_count <= 3)
+  {
+    P_value = mpt(replace(T_stats, T_stats>0, -T_stats), df)
+  }
+
+  cat(result)
+  cat("------------------------------")
+  cat("P-value = ", P_value)
+
 }
