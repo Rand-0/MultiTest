@@ -30,6 +30,9 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
   T_stats = c()
   T_interval = c()
+  T_interval_i = c()
+  Tsides_alt = 0
+  T_stats_pval = c()
 
   Qs_t = c(findQt(1-alpha, df, H_count, "t"), findQt(1-alpha/(2^H_count), df, H_count, "t"))
 
@@ -42,32 +45,39 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
     if (Hs_1[i] == "not.equal")
     {
-      T_interval_i = c(-round(Qs_t[2],4), round(Qs_t[2],4))
+      T_interval_i = c(-Inf, -round(Qs_t[2],4), round(Qs_t[2],4), Inf)
       T_interval = rbind(T_interval, T_interval_i)
+
+      Tsides_alt = Tsides_alt  + 1
+      T_stats_pval = append(T_stats_pval, abs(round(T_i,4)))
+
     } else if(Hs_1[i] == "greater")
     {
-      T_interval_i = c(round(Qs_t[2],4), Inf)
+      T_interval_i = c(NA, NA, round(Qs_t[2],4), Inf)
       T_interval = rbind(T_interval, T_interval_i)
+      T_stats_pval = append(T_stats_pval, round(T_i,4))
     } else if(Hs_1[i] == "less")
     {
-      T_interval_i = c(-Inf, -round(Qs_t[2],4))
+      T_interval_i = c(-Inf, -round(Qs_t[2],4), NA, NA)
       T_interval = rbind(T_interval, T_interval_i)
+      T_stats_pval = append(T_stats_pval, -round(T_i,4))
     }
   }
 
-  if(H_count <= 3)
-  {
-    P_value = mpt(replace(T_stats, T_stats>0, -T_stats), df)
-  } else
-  {
-    P_value = "P-value cannot be computed for more than 3 hypotheses!"
-  }
+  P_value = 2^Tsides_alt*mpt(T_stats_pval, df)
+
+  dimnames(T_interval)[[1]] = unname(Hs_0[1,])
+  dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u")
+
+  names(df) = "df"
 
   result = list(statistcs = T_stats, parameter = df, p.value = P_value,
-                conf.int = T_interval, estimate = object$coefficients[Hs_0[1,]],
+                critical.area = T_interval, estimate = object$coefficients[Hs_0[1,]],
                 null.value = as.numeric(Hs_0[2,]), stderr = sqrt(diag(vcov(object)))[Hs_0[1,]],
                 alternative = alternatives, method = "Muiltivariate t-test",
                 data.name = deparse(substitute(object)))
+
+  class(result) = "MultiTest"
 
   result
 }
