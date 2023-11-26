@@ -1,5 +1,7 @@
 MCInt_t <- function(k, df, x_min, x_max = 100, n_random = 100000)
 {
+  if(any(x_min > x_max)) { return(0) }
+
   set.seed(1234567)
 
   if (length(x_min) == 1) x_min <- rep(x_min, k)
