@@ -4,7 +4,7 @@
 \alias{t_test_combo.df}
 \title{Student's t-Test with multiple hypothesis}
 \usage{
-t_test_combo.df(object, hypotheses, alternatives, alpha = 0.05)
+\method{t_test_combo}{df}(object, hypotheses, alternatives, alpha = 0.05)
 }
 \arguments{
 \item{object}{A data frame.}

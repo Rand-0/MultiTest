@@ -1,7 +1,7 @@
 Package: MultiTest
 Type: Package
 Title: Perform statistics tests with multiple hypothesis in R.
-Version: 0.1.0
+Version: 0.2.0
 Author: Kacper Cierlik
 Maintainer: <kacper.cierlik@gmail.com>
 Description: Perform statistics tests with multiple hypothesis in R.
@@ -12,4 +12,5 @@ RoxygenNote: 7.2.3
 Imports: 
     pracma,
     stringr,
-    cubature
+    cubature,
+    purrr

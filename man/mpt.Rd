@@ -4,10 +4,12 @@
 \alias{mpt}
 \title{The multivariate Student t Distribution}
 \usage{
-mpt(X, v = 1)
+mpt(X, v = 1, lower.tails = c(FALSE))
 }
 \arguments{
 \item{X}{Vector of quantiles.}
+
+\item{lower.tails}{logical vector; if FALSE (default), probablities P[X>x], otherwise, P[X≤x].}
 
 \item{df}{degrees of freedom (>0).}
 }
