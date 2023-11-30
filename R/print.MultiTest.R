@@ -25,12 +25,23 @@ print.MultiTest <- function(object)
     } else { paste (pval)}
   }
 
+  convert_pval <- function()
+  {
+    if(all(object$p.value == -1))
+    {
+      object$p.value = c(1e-10, 1e-10)
+      cat("p-value < ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
+    } else
+    {
+      cat("p-value = ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
+    }
+  }
+
   cat("\n            ", object$method, "\n\n")
   cat("data: ", object$data.name, "\n")
   cat("dim = ", length(object$statistics), ", df = ", object$parameter, sep = "")
   cat(", t = (", paste(object$statistics, collapse = ", "), ")\n", sep = "")
-  cat("p-value = ", object$p.value[1], #show_pval(object$p.value[1])
-      " (error = ", object$p.value[2], ")\n", sep = "")
+  convert_pval()
   #cat(rep("-", 3), "\n", sep = "")
   #cat("Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
 

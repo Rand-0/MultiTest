@@ -2,8 +2,9 @@
 #'
 #' @param object A fitted "lm" object.
 #' @param hypotheses Vector of null hypothesis.
-#' @param alternatives Vector of alternative hypothesis, must be one of "two.sided", "greater" or "less".
+#' @param alternatives Vector of alternative hypothesis, must be one of "not.equal", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
+#' @param vcov Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.
 #'
 #' @return An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.
 #' @export
@@ -17,14 +18,14 @@
 #' data <- data.frame(x, z, q, y)
 #' model <- lm(y ~ x + z + q, data)
 #' t_test_combo(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
-t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05)
+t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL, f_debug = 0)
 {
   UseMethod("t_test_combo")
 }
 
 #' @rdname t_test_combo
 #' @export
-t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
+t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL, f_debug = 0)
 {
   startTime = Sys.time()
 
@@ -33,6 +34,9 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
   H_count = length(Hs_1)
   df = object$df.residual
+
+  if(is.null(vcov)) { vcov = sqrt(diag(vcov(object)))
+  } else {vcov = sqrt(diag(vcov))}
 
   if(H_count > 5) {stop("Method does not support more than 5 hypotheses!")}
 
@@ -54,8 +58,10 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
 
   for(i in 1:H_count)
   {
-    T_i = (object$coefficients[Hs_0[1,i]] - as.numeric(Hs_0[2,i])) / sqrt(diag(vcov(object)))[Hs_0[1,i]]
+    T_i = (object$coefficients[Hs_0[1,i]] - as.numeric(Hs_0[2,i])) / vcov[Hs_0[1,i]]
     T_stats = append(T_stats, round(T_i,4))
+
+    if(f_debug == 1) {print("Statystyki: ", T_i, "\n")}
 
     if (Hs_1[i] == "not.equal")
     {
@@ -82,6 +88,9 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05)
   }
 
   P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval),4)
+
+  if(any(P_value < 1e-10)) { P_value = c(-1,-1)}
+
   names(P_value) = c("estimate", "error")
 
   dimnames(T_interval)[[1]] = unname(Hs_0[1,])
