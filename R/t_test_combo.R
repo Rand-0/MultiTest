@@ -89,7 +89,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval),4)
 
-  if(any(P_value < 1e-10)) { P_value = c(-1,-1)}
+  P_value[(P_value < 1e-8 & P_value > 0)] = -1
 
   names(P_value) = c("estimate", "error")
 

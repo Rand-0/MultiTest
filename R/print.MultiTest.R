@@ -31,6 +31,14 @@ print.MultiTest <- function(object)
     {
       object$p.value = c(1e-10, 1e-10)
       cat("p-value < ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
+    } else if (object$p.value[1] == -1)
+    {
+      object$p.value[1] = 1e-10
+      cat("p-value < ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
+    } else if (object$p.value[2] == -1)
+    {
+      object$p.value[2] = 1e-10
+      cat("p-value = ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
     } else
     {
       cat("p-value = ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
