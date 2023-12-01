@@ -13,7 +13,7 @@ mpt <- function(X, v = 1, lower.tails = c(FALSE))
 {
   k = length(X)
 
-  if (length(lower.tails) == 1) { lower.tails = rep(lower.tails, k) }
+  if (length(lower.tails) == 1 & k > 1) { lower.tails = rep(lower.tails, k) }
 
   create_bounds <- function(x, lower.tail)
   {
@@ -30,11 +30,11 @@ mpt <- function(X, v = 1, lower.tails = c(FALSE))
 
   if(k == 1)
   {
-    value = pt(X, v, lower.tail = lower.tails)
+    value = pt(X, v, lower.tail = !lower.tails)
     error = 0
   } else if(k == 2)
   {
-    if(any(X >= 9)) { return(0) }
+    if(any(X >= 9)) { return(c(0,0)) }
 
     bdt <- function(x, y) {1/(2*pi)*(1+(x^2+y^2)/v)^(-(v+2)/2)}
 
@@ -42,7 +42,7 @@ mpt <- function(X, v = 1, lower.tails = c(FALSE))
     error = pracma::integral2(bdt, bounds[1,1], bounds[2,1], bounds[1,2], bounds[2,2])$error
   } else if(k == 3)
   {
-    if(any(X >= 9)) { return(0) }
+    if(any(X >= 9)) { return(c(0,0)) }
 
     tdt <- function(x, y, z)
     {
