@@ -1,4 +1,3 @@
-#' @rdname print
 #' @export
 print.MultiTest <- function(object)
 {
@@ -45,11 +44,27 @@ print.MultiTest <- function(object)
     }
   }
 
+  showCriteria <- function(type)
+  {
+    if(type == 0) { convert_pval() } else if (type == 1)
+    {
+      cat("\n")
+      print(object$critical.area)
+    } else
+    {
+      convert_pval()
+      cat("\n")
+      print(object$critical.area)
+    }
+  }
+
   cat("\n            ", object$method, "\n\n")
   cat("data: ", object$data.name, "\n")
-  cat("dim = ", length(object$statistics), ", df = ", object$parameter, sep = "")
+  cat("dim = ", length(object$statistics), ", df = ", object$parameters[1],
+      ", alpha = ", object$parameters[2], sep = "")
   cat(", t = (", paste(object$statistics, collapse = ", "), ")\n", sep = "")
-  convert_pval()
+  showCriteria(attr(object, 'print.method'))
+
   #cat(rep("-", 3), "\n", sep = "")
   #cat("Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
 

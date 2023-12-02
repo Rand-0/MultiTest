@@ -5,9 +5,23 @@
 \alias{t_test_combo.lm}
 \title{Student's t-Test with multiple hypothesis for linear regression model}
 \usage{
-t_test_combo(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL)
+t_test_combo(
+  object,
+  hypotheses,
+  alternatives,
+  alpha = 0.05,
+  vcov = NULL,
+  decision.criteria = "p-value"
+)
 
-\method{t_test_combo}{lm}(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL)
+\method{t_test_combo}{lm}(
+  object,
+  hypotheses,
+  alternatives,
+  alpha = 0.05,
+  vcov = NULL,
+  decision.criteria = "p-value"
+)
 }
 \arguments{
 \item{object}{A fitted "lm" object.}
@@ -19,6 +33,8 @@ t_test_combo(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL)
 \item{alpha}{Float. Statistical significance, by default = 0.05.}
 
 \item{vcov}{Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.}
+
+\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both".}
 }
 \value{
 An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.

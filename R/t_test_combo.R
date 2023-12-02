@@ -5,6 +5,7 @@
 #' @param alternatives Vector of alternative hypothesis, must be one of "not.equal", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
 #' @param vcov Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.
+#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both".
 #'
 #' @return An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.
 #' @export
@@ -18,30 +19,53 @@
 #' data <- data.frame(x, z, q, y)
 #' model <- lm(y ~ x + z + q, data)
 #' t_test_combo(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
-t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL, f_debug = 0)
+t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
+                         decision.criteria = "p-value")
 {
   UseMethod("t_test_combo")
 }
 
 #' @rdname t_test_combo
 #' @export
-t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL, f_debug = 0)
+t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
+                            decision.criteria = "p-value")
 {
+  options(warn = 1)
+
   startTime = Sys.time()
+
+    hs_check = hypotheses
+    class(hs_check) = "mt_hs"
+    validateObject(hs_check, alternatives)
+
+    decision_check = decision.criteria
+    class(decision_check) = "mt_decision"
+    validateObject(decision_check)
 
   Hs_0 = sapply(hypotheses, stringr::str_split_1, "=")
   Hs_1 = alternatives
 
   H_count = length(Hs_1)
   df = object$df.residual
+  coeff = object$coefficients
 
-  if(is.null(vcov)) { vcov = sqrt(diag(vcov(object)))
-  } else {vcov = sqrt(diag(vcov))}
+    coeff_check = coeff
+    class(coeff_check) = "mt_coeff"
+    validateObject(coeff_check, Hs_0)
 
-  if(H_count > 5) {stop("Method does not support more than 5 hypotheses!")}
+  if(is.null(vcov)) { vcov = vcov(object) }
 
-  if ((length(Hs_0)/2) != length(Hs_1))
-  {stop("List of hypotheses and alternatives should be equal!")}
+    vcov_check = vcov
+    class(vcov_check) = "mt_vcov"
+    validateObject(vcov_check, Hs_0)
+
+    params_check = c(df, alpha)
+    class(params_check) = "mt_params"
+    validateObject(params_check)
+
+  vcov = sqrt(diag(vcov))
+
+  vcov = replace(vcov, vcov == 0, 1e-10)
 
   T_stats = c()
   T_interval = c()
@@ -58,10 +82,8 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   for(i in 1:H_count)
   {
-    T_i = (object$coefficients[Hs_0[1,i]] - as.numeric(Hs_0[2,i])) / vcov[Hs_0[1,i]]
+    T_i = (coeff[Hs_0[1,i]] - as.numeric(Hs_0[2,i])) / vcov[Hs_0[1,i]]
     T_stats = append(T_stats, round(T_i,4))
-
-    if(f_debug == 1) {print("Statystyki: ", T_i, "\n")}
 
     if (Hs_1[i] == "not.equal")
     {
@@ -96,7 +118,9 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
   dimnames(T_interval)[[1]] = unname(Hs_0[1,])
   dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u")
 
-  names(df) = "df"
+  params = c(df, alpha)
+
+  names(params) = c("df", "alpha")
 
   errors = c(Qs_t_1[2], Qs_t_2[2])
 
@@ -106,7 +130,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   endTime = Sys.time()
 
-  result = list(statistics = T_stats, parameter = df, p.value = P_value,
+  result = list(statistics = T_stats, parameters = params, p.value = P_value,
                 critical.area = T_interval, quant.err = errors,
                 estimate = object$coefficients[Hs_0[1,]], null.value = as.numeric(Hs_0[2,]),
                 std.err = sqrt(diag(vcov(object)))[Hs_0[1,]],
@@ -114,6 +138,12 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
                 data.name = deparse(substitute(object)), exec.time = endTime - startTime)
 
   class(result) = "MultiTest"
+
+  attr(result, 'print.method') = switch(decision.criteria,
+                                        "p-value" = 0,
+                                        "critical.region" = 1,
+                                        "both" = 2)
+  options(warn = 0)
 
   result
 }
