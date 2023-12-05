@@ -5,7 +5,8 @@
 #' @param alternatives Vector of alternative hypothesis, must be one of "not.equal", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
 #' @param vcov Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.
-#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both".
+#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value" (default), "critical.region" or "both".
+#' @param merge. Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.
 #'
 #' @return An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.
 #' @export
@@ -20,7 +21,7 @@
 #' model <- lm(y ~ x + z + q, data)
 #' t_test_combo(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
 t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                         decision.criteria = "p-value")
+                         decision.criteria = "p-value", merge. = NULL)
 {
   UseMethod("t_test_combo")
 }
@@ -28,7 +29,7 @@ t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = 
 #' @rdname t_test_combo
 #' @export
 t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                            decision.criteria = "p-value")
+                            decision.criteria = "p-value", merge. = NULL)
 {
   options(warn = 1)
 
@@ -36,7 +37,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
     hs_check = hypotheses
     class(hs_check) = "mt_hs"
-    validateObject(hs_check, alternatives)
+    validateObject(hs_check, alternatives, merge.)
 
     decision_check = decision.criteria
     class(decision_check) = "mt_decision"
@@ -44,6 +45,26 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   Hs_0 = sapply(hypotheses, stringr::str_split_1, "=")
   Hs_1 = alternatives
+
+  if(!ifelse(is.null(merge.), TRUE, merge.))
+  {
+    cHs_0 = c()
+    cHs_1 = c()
+    for(i in 1:length(Hs_1))
+    {
+      if(Hs_0[1,i] != "")
+      {
+        cHs_0 = append(cHs_0, Hs_0[1:2,i])
+        cHs_1 = append(cHs_1, Hs_1[i])
+      }
+      if(Hs_0[1,i] %in% Hs_0[1,-i])
+      {
+        Hs_0[1,] = replace(Hs_0[1,], Hs_0[1,] == Hs_0[1,i], "")
+      }
+    }
+    Hs_0 = matrix(cHs_0, nrow = 2)
+    Hs_1 = cHs_1
+  }
 
   H_count = length(Hs_1)
   df = object$df.residual
@@ -115,8 +136,12 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   names(P_value) = c("estimate", "error")
 
+  PI = calcPI(T_stats, Hs_1, Qs_t_1[1], Qs_t_2[1])
+
+  T_interval = cbind(T_interval, PI)
+
   dimnames(T_interval)[[1]] = unname(Hs_0[1,])
-  dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u")
+  dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u", "PI")
 
   params = c(df, alpha)
 
@@ -134,7 +159,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
                 critical.area = T_interval, quant.err = errors,
                 estimate = object$coefficients[Hs_0[1,]], null.value = as.numeric(Hs_0[2,]),
                 std.err = sqrt(diag(vcov(object)))[Hs_0[1,]],
-                alternative = alternatives, method = "Muiltivariate t-test",
+                alternative = Hs_1, method = "Muiltivariate t-test",
                 data.name = deparse(substitute(object)), exec.time = endTime - startTime)
 
   class(result) = "MultiTest"

@@ -11,7 +11,8 @@ t_test_combo(
   alternatives,
   alpha = 0.05,
   vcov = NULL,
-  decision.criteria = "p-value"
+  decision.criteria = "p-value",
+  merge. = NULL
 )
 
 \method{t_test_combo}{lm}(
@@ -20,7 +21,8 @@ t_test_combo(
   alternatives,
   alpha = 0.05,
   vcov = NULL,
-  decision.criteria = "p-value"
+  decision.criteria = "p-value",
+  merge. = NULL
 )
 }
 \arguments{
@@ -34,7 +36,9 @@ t_test_combo(
 
 \item{vcov}{Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.}
 
-\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both".}
+\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value" (default), "critical.region" or "both".}
+
+\item{merge.}{Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.}
 }
 \value{
 An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.

@@ -1,4 +1,4 @@
-validateObject <- function(object, params = NULL)
+validateObject <- function(object, params = NULL, params2 = NULL)
 {
   UseMethod("validateObject")
 }
@@ -39,8 +39,11 @@ validateObject.mt_vcov <- function(object, params)
 }
 
 #' @export
-validateObject.mt_hs <- function(object, params)
+validateObject.mt_hs <- function(object, params, params2)
 {
+  if(ifelse(is.null(params2), FALSE, params2) != FALSE)
+  {stop("Incorrect parameter merge. - use only FALSE, or default NULL!", call. = FALSE)}
+
   if(!is.character(object))
   {stop("Null hypothesis should be character type!", call. = FALSE)}
 
@@ -66,6 +69,35 @@ validateObject.mt_hs <- function(object, params)
   if(!all(params %in% c("less", "not.equal", "greater")))
   {stop('Incorrect structure of alternative hypothesis. Should contain only "less", "not.equal" or "greater"!',
           call. = FALSE)}
+
+  mes = FALSE
+
+  for(i in 1:length(params))
+  {
+    p = object[1,i]
+    object[1,i] = ""
+    index = match(p, object[1,], 0)
+    if(index != 0)
+    {
+      if(object[2,i] != object[2,index[1]])
+      {
+        er = paste("Parameter for variable", p,
+                   "has been specified >2 times, with different values!")
+        stop(er, call. = FALSE)
+      } else if(params[i] == params[index] & is.null(params2))
+      {
+        warning("Identical parts of hypothesis has been merged into one, to avoid unintentional results.",
+                call. = FALSE)
+        warning('If you aware of interpretation in this case, use "merge. = FALSE" in function call.',
+                call. = FALSE)
+      } else if (params[i] == params[index] & !ifelse(is.null(params2), TRUE, params2) & !mes)
+      {
+        mes = TRUE
+        message('With given parameter "merge. = FALSE", identical parts of hypothesis has not been merged.',
+                appendLF = TRUE)
+      }
+    }
+  }
 }
 
 #' @export
