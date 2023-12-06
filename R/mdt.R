@@ -4,6 +4,7 @@
 #' @param X Vector of quantiles.
 #' @param df degrees of freedom (>0).
 #' @returns Numeric value.
+#' @export
 #' @examples
 #' mdt(c(1,1), 100)
 #' mdt(1)

@@ -3,6 +3,7 @@
 #' Returns density for the m-variate normal distribution for a vector of length 'm'.
 #' @param X Vector of quantiles.
 #' @returns Numeric value.
+#' @export
 #' @examples
 #' mdnorm(c(1,1))
 #' mdnorm(1)
