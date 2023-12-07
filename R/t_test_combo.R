@@ -46,7 +46,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
   Hs_0 = sapply(hypotheses, stringr::str_split_1, "=")
   Hs_1 = alternatives
 
-  if(!ifelse(is.null(merge.), TRUE, merge.))
+  if(ifelse(is.null(merge.), TRUE, merge.))
   {
     cHs_0 = c()
     cHs_1 = c()
