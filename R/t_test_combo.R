@@ -21,7 +21,7 @@
 #' model <- lm(y ~ x + z + q, data)
 #' t_test_combo(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
 t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                         decision.criteria = "p-value", merge. = NULL)
+                         decision.criteria = "both", merge. = NULL)
 {
   UseMethod("t_test_combo")
 }
@@ -143,9 +143,11 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
   dimnames(T_interval)[[1]] = unname(Hs_0[1,])
   dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u", "PI")
 
-  params = c(df, alpha)
+  EQI = round(sd(PI), 4)
 
-  names(params) = c("df", "alpha")
+  params = c(df, alpha, EQI)
+
+  names(params) = c("df", "alpha", "EQI")
 
   errors = c(Qs_t_1[2], Qs_t_2[2])
 
