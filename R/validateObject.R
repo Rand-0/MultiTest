@@ -125,3 +125,13 @@ validateObject.mt_decision <- function(object)
   {stop('Incorrect decision criteria. Should be one of "p-value", "critical.region" or "both"!',
           call. = FALSE)}
 }
+
+#' @export
+validateObject.mt_EQI <- function(object)
+{
+  mess = paste("Imbalanced distribution of false positives (type I errors). P-value might be biased.\n",
+               "To avoid this, decision should be based on analysis of the Critical Area!")
+  if(object > 1)
+  { warning(mess, call. = FALSE) }
+
+}

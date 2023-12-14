@@ -29,22 +29,18 @@ print.MultiTest <- function(object)
     if(all(object$p.value == -1))
     {
       object$p.value = c(1e-10, 1e-10)
-      cat("p-value < ", object$p.value[1], " (error < ", object$p.value[2], ")",
-          ", EQI = ", object$parameters[3], sep = "")
+      cat("p-value < ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
     } else if (object$p.value[1] == -1)
     {
       object$p.value[1] = 1e-10
-      cat("p-value < ", object$p.value[1], " (error = ", object$p.value[2], ")",
-          ", EQI = ", object$parameters[3], sep = "")
+      cat("p-value < ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
     } else if (object$p.value[2] == -1)
     {
       object$p.value[2] = 1e-10
-      cat("p-value = ", object$p.value[1], " (error < ", object$p.value[2], ")",
-          ", EQI = ", object$parameters[3], sep = "")
+      cat("p-value = ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
     } else
     {
-      cat("p-value = ", object$p.value[1], " (error = ", object$p.value[2], ")",
-          ", EQI = ", object$parameters[3], sep = "")
+      cat("p-value = ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
     }
   }
 
@@ -53,11 +49,13 @@ print.MultiTest <- function(object)
     if(type == 0) { convert_pval() } else if (type == 1)
     {
       cat("\n")
+      cat("Critical area:\n")
       print(object$critical.area)
     } else
     {
       convert_pval()
       cat("\n")
+      cat("Critical area:\n")
       print(object$critical.area)
     }
   }

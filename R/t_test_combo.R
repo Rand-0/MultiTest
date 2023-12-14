@@ -29,7 +29,7 @@ t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = 
 #' @rdname t_test_combo
 #' @export
 t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                            decision.criteria = "p-value", merge. = NULL)
+                            decision.criteria = "both", merge. = NULL)
 {
   options(warn = 1)
 
@@ -132,6 +132,14 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval),4)
 
+  EQI_p = findQt((1 - P_value[1]/(2^Tsides_alt)), df, H_count, "t")[1]
+
+  EQI = dist(rbind(rep(EQI_p, H_count), T_stats))
+
+    EQI_check = EQI
+    class(EQI_check) = "mt_EQI"
+    validateObject(EQI_check)
+
   P_value[(P_value < 1e-8 & P_value > 0)] = -1
 
   names(P_value) = c("estimate", "error")
@@ -142,8 +150,6 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   dimnames(T_interval)[[1]] = unname(Hs_0[1,])
   dimnames(T_interval)[[2]] = c("n.bound.l","n.bound.u","p.bound.l","p.bound.u", "PI")
-
-  EQI = round(sd(PI), 4)
 
   params = c(df, alpha, EQI)
 
