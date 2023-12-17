@@ -129,9 +129,19 @@ validateObject.mt_decision <- function(object)
 #' @export
 validateObject.mt_EQI <- function(object)
 {
-  mess = paste("Imbalanced distribution of false positives (type I errors). P-value might be biased.\n",
-               "To avoid this, decision should be based on analysis of the Critical Area!")
-  if(object > 1)
-  { warning(mess, call. = FALSE) }
+  if(object > 0.01)
+  { warning("Imbalanced distribution of false positives (type I errors). P-value might be biased.\n"
+            , call. = FALSE) }
+
+}
+
+#' @export
+validateObject.mt_family <- function(object)
+{
+  mess = paste("Incorrect parameter family - use only mvt (multivariate t-Test) or mvnorm",
+               "(multivariate z-Test)!")
+
+  if(!(object$family %in% c("mvt", "mvnorm")))
+  { stop(mess, call. = FALSE) }
 
 }

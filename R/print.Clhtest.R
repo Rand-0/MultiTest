@@ -1,5 +1,5 @@
 #' @export
-print.MultiTest <- function(object)
+print.Clhtest <- function(object)
 {
   concate_hypothesis <- function(param, x, val)
   {
@@ -61,7 +61,9 @@ print.MultiTest <- function(object)
   }
 
   cat("\n            ", object$method, "\n\n")
-  cat("data: ", object$data.name, "\n")
+
+  if(!is.null(object$data.name)) { cat("data: ", object$data.name, "\n") }
+
   cat("dim = ", length(object$statistics), ", df = ", object$parameters[1],
       ", alpha = ", object$parameters[2], sep = "")
   cat(", t = (", paste(object$statistics, collapse = ", "), ")\n", sep = "")

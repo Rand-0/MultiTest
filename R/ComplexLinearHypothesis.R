@@ -1,35 +1,66 @@
-#' Student's t-Test with multiple hypothesis for linear regression model
+#' @title Test Complex Linear Hypothesis
 #'
-#' @param object A fitted "lm" object.
+#' @description
+#' Generic function for testing a complex linear hypothesis, including multivariate
+#' Student's t-Test for generalized linear models (OLS and MM regressions) and
+#' z-Test for MLE parameters.
+#'
+#' @family CLH
+#'
+#' @param coefficients Named vector of coefficients.
+#' @param vcov Covariance matrix.
+#' @param df Degrees of freedom.
 #' @param hypotheses Vector of null hypothesis.
 #' @param alternatives Vector of alternative hypothesis, must be one of "not.equal", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
-#' @param vcov Covariance matrix. When supplied with "lm" object, it replaces the vcov matrix from model.
-#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value" (default), "critical.region" or "both".
+#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both" (default).
 #' @param merge. Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.
+#' @param family Character. Type of test which should be performed, either "mvt" (multivariate t-Test) or "mvnorm" (multivariate z-Test).
+#' @param ... Arguments to pass down.
 #'
-#' @return An object containg list of hypothesis, value of t-test statistics and corresponding critical regions.
 #' @export
-#'
-#' @examples
-#' x <- runif(100, min = 0, max = 100)
-#' z <- runif(100, min = 0, max = 100)
-#' q <- runif(100, min = 0, max = 100)
-#' e <- rnorm(100, mean = 0, sd = 1)
-#' y <- 4*x + 5*z + 6*q + 1 + e
-#' data <- data.frame(x, z, q, y)
-#' model <- lm(y ~ x + z + q, data)
-#' t_test_combo(model, c("x=4", "z=5", "q=6"), c("not.equal", "less", "greater"))
-t_test_combo <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                         decision.criteria = "both", merge. = NULL)
+ComplexLinearHypothesis <- function(coefficients, vcov, df,
+                                    hypotheses, alternatives, alpha = 0.05,
+                                    decision.criteria = "both", merge. = NULL, family, ...)
 {
-  UseMethod("t_test_combo")
+    family_check = list(family = family)
+    class(family_check) = "mt_family"
+    validateObject(family_check)
+
+  data.name = ifelse(!is.null(list(...)["data.name"]), list(...)["data.name"], NULL)
+
+  if(family == "mvt")
+  {
+    ComplexLinearHypothesis.mvt(coefficients, vcov, df,
+                                hypotheses, alternatives, alpha,
+                                decision.criteria, merge., data.name)
+  } else if(family == "mvnorm")
+  {
+    ComplexLinearHypothesis.mvnorm(coefficients, vcov, df,
+                                   hypotheses, alternatives, alpha,
+                                   decision.criteria, merge., data.name)
+  }
 }
 
-#' @rdname t_test_combo
+
+#' @description
+#' CLH is an alias for ComplexLinearHypothesis.
+#'
 #' @export
-t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov = NULL,
-                            decision.criteria = "both", merge. = NULL)
+#' @rdname ComplexLinearHypothesis
+CLH <- function(coefficients, vcov, df,
+                hypotheses, alternatives, alpha = 0.05,
+                decision.criteria = "both", merge. = NULL, family, ...)
+{
+  ComplexLinearHypothesis(coefficients, vcov, df,
+                          hypotheses, alternatives, alpha,
+                          decision.criteria, merge., family, ...)
+}
+
+#' @rdname ComplexLinearHypothesis
+ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
+                                        hypotheses, alternatives, alpha = 0.05,
+                                        decision.criteria = "both", merge. = NULL, data.name)
 {
   options(warn = 1)
 
@@ -67,14 +98,11 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
   }
 
   H_count = length(Hs_1)
-  df = object$df.residual
-  coeff = object$coefficients
+  coeff = coefficients
 
     coeff_check = coeff
     class(coeff_check) = "mt_coeff"
     validateObject(coeff_check, Hs_0)
-
-  if(is.null(vcov)) { vcov = vcov(object) }
 
     vcov_check = vcov
     class(vcov_check) = "mt_vcov"
@@ -94,6 +122,7 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
   Tsides_alt = 0
   T_stats_pval = c()
   Tsides_pval = c()
+  doesBelong = c()
 
   Qs_t_1 = findQt(1-alpha, df, H_count, "t")
   Qs_t_2 = findQt(1-alpha/(2^H_count), df, H_count, "t")
@@ -113,28 +142,50 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
       Tsides_alt = Tsides_alt  + 1
       T_stats_pval = append(T_stats_pval, abs(round(T_i,4)))
-      Tsides_pval = append(Tsides_pval, TRUE)
+      Tsides_pval = append(Tsides_pval, FALSE)
+
+      if(T_i > Qs_t_2[1])
+      { doesBelong = rbind(doesBelong, c(T_i, Inf)) } else if(T_i > -Qs_t_2[1])
+      { doesBelong = rbind(doesBelong, c(T_i, Qs_t_2[1])) } else if(T_i < -Qs_t_2[1])
+      { doesBelong = rbind(doesBelong, c(-Inf, T_i)) } else
+      { doesBelong = rbind(doesBelong, c(-Qs_t_2[1], T_i)) }
 
     } else if(Hs_1[i] == "greater")
     {
       T_interval_i = c(NA, NA, round(Qs_t_1[1],4), Inf)
       T_interval = rbind(T_interval, T_interval_i)
       T_stats_pval = append(T_stats_pval, round(T_i,4))
-      Tsides_pval = append(Tsides_pval, TRUE)
+      Tsides_pval = append(Tsides_pval, FALSE)
+
+      if(T_i > Qs_t_1[1])
+      { doesBelong = rbind(doesBelong, c(T_i, Inf)) } else
+        { doesBelong = rbind(doesBelong, c(T_i, Qs_t_1[1])) }
+
     } else if(Hs_1[i] == "less")
     {
       T_interval_i = c(-Inf, -round(Qs_t_1[1],4), NA, NA)
       T_interval = rbind(T_interval, T_interval_i)
       T_stats_pval = append(T_stats_pval, round(T_i,4))
-      Tsides_pval = append(Tsides_pval, FALSE)
+      Tsides_pval = append(Tsides_pval, TRUE)
+
+      if(T_i < -Qs_t_1[1])
+      { doesBelong = rbind(doesBelong, c(-Inf, T_i)) } else
+        { doesBelong = rbind(doesBelong, c(-Qs_t_1[1], T_i)) }
+
     }
   }
 
-  P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval),4)
+  #P-value correction for mv tests - TODO
+  #P_value = mpt(T_stats_pval, df, Tsides_pval)
 
-  EQI_p = findQt((1 - P_value[1]/(2^Tsides_alt)), df, H_count, "t")[1]
+  #P_cor = corPval(doesBelong, P_value, df, Tsides_alt)
 
-  EQI = dist(rbind(rep(EQI_p, H_count), T_stats))
+  #P_value = P_cor[1:2]
+  #EQI = P_cor[3]
+
+  #temporary
+  P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval), 4)
+  EQI = 0
 
     EQI_check = EQI
     class(EQI_check) = "mt_EQI"
@@ -165,12 +216,12 @@ t_test_combo.lm <- function(object, hypotheses, alternatives, alpha = 0.05, vcov
 
   result = list(statistics = T_stats, parameters = params, p.value = P_value,
                 critical.area = T_interval, quant.err = errors,
-                estimate = object$coefficients[Hs_0[1,]], null.value = as.numeric(Hs_0[2,]),
-                std.err = sqrt(diag(vcov(object)))[Hs_0[1,]],
+                estimate = coeff[Hs_0[1,]], null.value = as.numeric(Hs_0[2,]),
+                std.err = sqrt(diag(vcov))[Hs_0[1,]],
                 alternative = Hs_1, method = "Muiltivariate t-test",
-                data.name = deparse(substitute(object)), exec.time = endTime - startTime)
+                data.name = unlist(data.name), exec.time = endTime - startTime)
 
-  class(result) = "MultiTest"
+  class(result) = "Clhtest"
 
   attr(result, 'print.method') = switch(decision.criteria,
                                         "p-value" = 0,

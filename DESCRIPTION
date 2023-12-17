@@ -1,7 +1,7 @@
 Package: MultiTest
 Type: Package
 Title: Perform statistics tests with multiple hypothesis in R.
-Version: 0.3.1
+Version: 0.4.0
 Author: Kacper Cierlik
 Maintainer: <kacper.cierlik@gmail.com>
 Description: Perform statistics tests with multiple hypothesis in R.
