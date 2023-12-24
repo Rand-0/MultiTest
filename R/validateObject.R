@@ -129,9 +129,10 @@ validateObject.mt_decision <- function(object)
 #' @export
 validateObject.mt_EQI <- function(object)
 {
-  if(object > 0.01)
-  { warning("Imbalanced distribution of false positives (type I errors). P-value might be biased.\n"
-            , call. = FALSE) }
+  mess = paste0("Imbalanced distribution of false positives (type I errors).\n",
+               "True P-value might differ from classic interpretation!.\n")
+  if(abs(object) > 0.05)
+  { warning(mess, call. = FALSE) }
 
 }
 

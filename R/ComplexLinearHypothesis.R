@@ -122,7 +122,6 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
   Tsides_alt = 0
   T_stats_pval = c()
   Tsides_pval = c()
-  doesBelong = c()
 
   Qs_t_1 = findQt(1-alpha, df, H_count, "t")
   Qs_t_2 = findQt(1-alpha/(2^H_count), df, H_count, "t")
@@ -144,22 +143,12 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
       T_stats_pval = append(T_stats_pval, abs(round(T_i,4)))
       Tsides_pval = append(Tsides_pval, FALSE)
 
-      if(T_i > Qs_t_2[1])
-      { doesBelong = rbind(doesBelong, c(T_i, Inf)) } else if(T_i > -Qs_t_2[1])
-      { doesBelong = rbind(doesBelong, c(T_i, Qs_t_2[1])) } else if(T_i < -Qs_t_2[1])
-      { doesBelong = rbind(doesBelong, c(-Inf, T_i)) } else
-      { doesBelong = rbind(doesBelong, c(-Qs_t_2[1], T_i)) }
-
     } else if(Hs_1[i] == "greater")
     {
       T_interval_i = c(NA, NA, round(Qs_t_1[1],4), Inf)
       T_interval = rbind(T_interval, T_interval_i)
       T_stats_pval = append(T_stats_pval, round(T_i,4))
       Tsides_pval = append(Tsides_pval, FALSE)
-
-      if(T_i > Qs_t_1[1])
-      { doesBelong = rbind(doesBelong, c(T_i, Inf)) } else
-        { doesBelong = rbind(doesBelong, c(T_i, Qs_t_1[1])) }
 
     } else if(Hs_1[i] == "less")
     {
@@ -168,28 +157,23 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
       T_stats_pval = append(T_stats_pval, round(T_i,4))
       Tsides_pval = append(Tsides_pval, TRUE)
 
-      if(T_i < -Qs_t_1[1])
-      { doesBelong = rbind(doesBelong, c(-Inf, T_i)) } else
-        { doesBelong = rbind(doesBelong, c(-Qs_t_1[1], T_i)) }
-
     }
   }
 
-  #P-value correction for mv tests - TODO
-  #P_value = mpt(T_stats_pval, df, Tsides_pval)
-
-  #P_cor = corPval(doesBelong, P_value, df, Tsides_alt)
-
-  #P_value = P_cor[1:2]
-  #EQI = P_cor[3]
-
-  #temporary
   P_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval), 4)
-  EQI = 0
+
+  #P-value correction for mv tests
+  T_stats_pval = corPval(T_stats_pval, Hs_1, Tsides_pval)
+
+  corP_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval), 4)
+
+  EQI = round(((P_value[1] - corP_value[1])/P_value[1]), 2)
 
     EQI_check = EQI
     class(EQI_check) = "mt_EQI"
     validateObject(EQI_check)
+
+  P_value = corP_value
 
   P_value[(P_value < 1e-8 & P_value > 0)] = -1
 
