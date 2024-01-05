@@ -3,10 +3,10 @@ corPval <- function(t_stats, alt, sides_pval)
   find_point <- function(t, a)
   {
     left = t[which(a == "less")]
-    right = t[-which(a == "less")]
+    right = t[which(a != "less")]
 
-    p.max = ifelse(is.na(left), NULL, max(left))
-    p.min = ifelse(is.na(right), NULL, min(right))
+    if(length(left) == 0 & !is.null(length)) { p.max = NULL } else { p.max = max(left)}
+    if(length(right) == 0 & !is.null(right)) { p.min = NULL } else { p.min = min(right)}
 
     if(is.null(p.max)) { p.min } else if(is.null(p.min)) { p.max } else
     {
