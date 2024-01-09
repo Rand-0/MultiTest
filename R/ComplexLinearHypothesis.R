@@ -167,7 +167,13 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
 
   corP_value = signif(2^Tsides_alt*mpt(T_stats_pval, df, Tsides_pval), 4)
 
-  EQI = round(((P_value[1] - corP_value[1])/P_value[1]), 2)
+  if(P_value[1] == 0)
+  {
+    EQI = round(((P_value[1] - corP_value[1])/1e-10), 2)
+  } else
+  {
+    EQI = round(((P_value[1] - corP_value[1])/P_value[1]), 2)
+  }
 
     EQI_check = EQI
     class(EQI_check) = "mt_EQI"

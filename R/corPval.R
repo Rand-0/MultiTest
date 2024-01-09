@@ -16,7 +16,7 @@ corPval <- function(t_stats, alt, sides_pval)
   }
 
   p.p_val = find_point(t_stats, alt)
-  side = ifelse(alt[which(t_stats == p.p_val)] == "less", TRUE, FALSE)
+  side = ifelse(alt[which(t_stats == p.p_val)[1]] == "less", TRUE, FALSE)
 
   unname(sapply(sides_pval, function(x) if(x == side) { p.p_val } else { -p.p_val }))
 }
