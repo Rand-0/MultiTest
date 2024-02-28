@@ -125,3 +125,26 @@ validateObject.mt_decision <- function(object)
   {stop('Incorrect decision criteria. Should be one of "p-value", "critical.region" or "both"!',
           call. = FALSE)}
 }
+
+#' @export
+validateObject.mt_EQI <- function(object)
+{
+  mess = paste0("Imbalanced distribution of false positives (type I errors).\n",
+               "True P-value might differ from classic interpretation!.\n")
+
+  #TODO: Uncomment when corrected p-value goes live
+  # if(abs(object) > 0.05)
+  # { warning(mess, call. = FALSE) }
+
+}
+
+#' @export
+validateObject.mt_family <- function(object)
+{
+  mess = paste("Incorrect parameter family - use only mvt (multivariate t-Test) or mvnorm",
+               "(multivariate z-Test)!")
+
+  if(!(object$family %in% c("mvt", "mvnorm")))
+  { stop(mess, call. = FALSE) }
+
+}

@@ -4,12 +4,12 @@
 \alias{mpt}
 \title{The multivariate Student t Distribution}
 \usage{
-mpt(X, v = 1, lower.tails = c(FALSE))
+mpt(X, v = 1, lower.tails = c(TRUE))
 }
 \arguments{
 \item{X}{Vector of quantiles.}
 
-\item{lower.tails}{logical vector; if FALSE (default), probablities P[X>x], otherwise, P[X≤x].}
+\item{lower.tails}{logical vector; if TRUE (default), probablities P[X≤x], otherwise, P[X>x].}
 
 \item{df}{degrees of freedom (>0).}
 }
@@ -20,6 +20,6 @@ Numeric value.
 Returns CDF for the m-variate t distribution with 'df' degrees of freedom, for a vector of length 'm'.
 }
 \examples{
-mpt(c(1,1), 100)
+mpt(c(1,1), 100, c(TRUE,FALSE))
 mpt(1)
 }

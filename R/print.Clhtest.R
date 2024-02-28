@@ -1,5 +1,5 @@
 #' @export
-print.MultiTest <- function(object)
+print.Clhtest <- function(object)
 {
   concate_hypothesis <- function(param, x, val)
   {
@@ -26,17 +26,14 @@ print.MultiTest <- function(object)
 
   convert_pval <- function()
   {
-    if(all(object$p.value == -1))
+    if(all(object$p.value == 1e-10))
     {
-      object$p.value = c(1e-10, 1e-10)
       cat("p-value < ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
-    } else if (object$p.value[1] == -1)
+    } else if (object$p.value[1] == 1e-10)
     {
-      object$p.value[1] = 1e-10
       cat("p-value < ", object$p.value[1], " (error = ", object$p.value[2], ")\n", sep = "")
-    } else if (object$p.value[2] == -1)
+    } else if (object$p.value[2] == 1e-10)
     {
-      object$p.value[2] = 1e-10
       cat("p-value = ", object$p.value[1], " (error < ", object$p.value[2], ")\n", sep = "")
     } else
     {
@@ -49,17 +46,21 @@ print.MultiTest <- function(object)
     if(type == 0) { convert_pval() } else if (type == 1)
     {
       cat("\n")
+      cat("Critical area:\n")
       print(object$critical.area)
     } else
     {
       convert_pval()
       cat("\n")
+      cat("Critical area:\n")
       print(object$critical.area)
     }
   }
 
   cat("\n            ", object$method, "\n\n")
-  cat("data: ", object$data.name, "\n")
+
+  if(!is.null(object$data.name)) { cat("data: ", object$data.name, "\n") }
+
   cat("dim = ", length(object$statistics), ", df = ", object$parameters[1],
       ", alpha = ", object$parameters[2], sep = "")
   cat(", t = (", paste(object$statistics, collapse = ", "), ")\n", sep = "")
