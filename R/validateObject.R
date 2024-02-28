@@ -131,8 +131,10 @@ validateObject.mt_EQI <- function(object)
 {
   mess = paste0("Imbalanced distribution of false positives (type I errors).\n",
                "True P-value might differ from classic interpretation!.\n")
-  if(abs(object) > 0.05)
-  { warning(mess, call. = FALSE) }
+
+  #TODO: Uncomment when corrected p-value goes live
+  # if(abs(object) > 0.05)
+  # { warning(mess, call. = FALSE) }
 
 }
 

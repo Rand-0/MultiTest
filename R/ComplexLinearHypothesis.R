@@ -13,7 +13,7 @@
 #' @param hypotheses Vector of null hypothesis.
 #' @param alternatives Vector of alternative hypothesis, must be one of "not.equal", "greater" or "less".
 #' @param alpha Float. Statistical significance, by default = 0.05.
-#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both" (default).
+#' @param decision.criteria Character. Which decision criterion should be displayed when printing result, either "p-value" (experimental), "critical.region" (default) or "both."
 #' @param merge. Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.
 #' @param family Character. Type of test which should be performed, either "mvt" (multivariate t-Test) or "mvnorm" (multivariate z-Test).
 #' @param ... Arguments to pass down.
@@ -21,7 +21,7 @@
 #' @export
 ComplexLinearHypothesis <- function(coefficients, vcov, df,
                                     hypotheses, alternatives, alpha = 0.05,
-                                    decision.criteria = "both", merge. = NULL, family, ...)
+                                    decision.criteria = "critical.region", merge. = NULL, family, ...)
 {
     family_check = list(family = family)
     class(family_check) = "mt_family"
@@ -50,7 +50,7 @@ ComplexLinearHypothesis <- function(coefficients, vcov, df,
 #' @rdname ComplexLinearHypothesis
 CLH <- function(coefficients, vcov, df,
                 hypotheses, alternatives, alpha = 0.05,
-                decision.criteria = "both", merge. = NULL, family, ...)
+                decision.criteria = "critical.region", merge. = NULL, family, ...)
 {
   ComplexLinearHypothesis(coefficients, vcov, df,
                           hypotheses, alternatives, alpha,
@@ -60,7 +60,7 @@ CLH <- function(coefficients, vcov, df,
 #' @rdname ComplexLinearHypothesis
 ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
                                         hypotheses, alternatives, alpha = 0.05,
-                                        decision.criteria = "both", merge. = NULL, data.name)
+                                        decision.criteria = "critical.region", merge. = NULL, data.name)
 {
   options(warn = 1)
 
@@ -181,7 +181,11 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
 
   P_value = corP_value
 
-  P_value[(P_value < 1e-8 & P_value > 0)] = -1
+  P_value[(P_value < 1e-8 & P_value > 0)] = 1e-10
+
+  #TODO: dont do it like this, it's embarrassing
+  P_value[P_value < 0] = 0
+  P_value[P_value > 1] = 1
 
   names(P_value) = c("estimate", "error")
 
@@ -208,7 +212,7 @@ ComplexLinearHypothesis.mvt <- function(coefficients, vcov, df,
                 critical.area = T_interval, quant.err = errors,
                 estimate = coeff[Hs_0[1,]], null.value = as.numeric(Hs_0[2,]),
                 std.err = sqrt(diag(vcov))[Hs_0[1,]],
-                alternative = Hs_1, method = "Muiltivariate t-test",
+                alternative = Hs_1, method = "Multivariate t-test",
                 data.name = unlist(data.name), exec.time = endTime - startTime)
 
   class(result) = "Clhtest"

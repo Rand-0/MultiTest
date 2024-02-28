@@ -13,7 +13,7 @@ Cl_test_t(
   alpha = 0.05,
   vcov = NULL,
   df = NULL,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL
 )
 
@@ -23,7 +23,7 @@ Cl_test_t(
   alternatives,
   alpha = 0.05,
   vcov = NULL,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL
 )
 
@@ -34,7 +34,7 @@ Cl_test_t(
   alpha = 0.05,
   vcov,
   df,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL
 )
 }
@@ -51,7 +51,7 @@ Cl_test_t(
 
 \item{df}{Number of observation in model diminished by number of exogenous variables with constant term.}
 
-\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both" (default).}
+\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value" (experimental), "critical.region" (default) or "both".}
 
 \item{merge.}{Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.}
 }

@@ -13,7 +13,7 @@ ComplexLinearHypothesis(
   hypotheses,
   alternatives,
   alpha = 0.05,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL,
   family,
   ...
@@ -26,7 +26,7 @@ CLH(
   hypotheses,
   alternatives,
   alpha = 0.05,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL,
   family,
   ...
@@ -39,7 +39,7 @@ ComplexLinearHypothesis.mvt(
   hypotheses,
   alternatives,
   alpha = 0.05,
-  decision.criteria = "both",
+  decision.criteria = "critical.region",
   merge. = NULL,
   data.name
 )
@@ -57,7 +57,7 @@ ComplexLinearHypothesis.mvt(
 
 \item{alpha}{Float. Statistical significance, by default = 0.05.}
 
-\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value", "critical.region" or "both" (default).}
+\item{decision.criteria}{Character. Which decision criterion should be displayed when printing result, either "p-value" (experimental), "critical.region" (default) or "both."}
 
 \item{merge.}{Logical. When FALSE is supplied, identical elements of hypothesis will not be merged.}
 
